@@ -79,23 +79,31 @@ async function processResponses(messages: ChatMessage[], options: ChatCompletion
     // v4 uses both MCP servers and function-based tools
     tools = []
     
+    console.log('🔧 Setting up MCP tools for v4...')
+    
     // Add Tavily MCP server if API key is available
     if (process.env.TAVILY_API_KEY) {
+      console.log('✅ Adding Tavily MCP server')
       tools.push({
         type: 'mcp',
         server_label: 'tavily',
         server_url: `https://mcp.tavily.com/mcp/?tavilyApiKey=${process.env.TAVILY_API_KEY}`,
         require_approval: 'never',
       })
+    } else {
+      console.log('❌ TAVILY_API_KEY not found - skipping Tavily MCP')
     }
     
     // Add Apollo GraphQL MCP server
+    console.log('✅ Adding Apollo GraphQL MCP server')
     tools.push({
       type: 'mcp',
       server_label: 'apollo-graphql',
       server_url: 'https://mcp-server-production-b970.up.railway.app/mcp',
       require_approval: 'never',
     })
+    
+    console.log(`📊 Total MCP tools configured: ${tools.filter(t => t.type === 'mcp').length}`)
     
     // Also add YELP function-based tools for food recommendations
     if (functions.length > 0) {
@@ -187,11 +195,26 @@ async function processNonStreamingRequest(
       console.log('Request params:', { model, tools: tools ? 'defined' : 'undefined' })
     }
 
+    console.log('🚀 Making request to OpenAI Responses API with MCP tools...')
     const response = await openai.responses.create({
       model,
       input: messageContent,
       ...(tools ? { tools } : {}),
     })
+    
+    console.log('📥 Received response from OpenAI Responses API')
+    console.log('📋 Response structure:', {
+      id: response.id,
+      model: response.model,
+      output_length: response.output?.length || 0,
+      has_output_text: !!response.output_text,
+      output_types: response.output?.map(item => item.type) || []
+    })
+    
+    // Log full response structure for debugging
+    if (debug) {
+      console.log('🔍 Full response output:', JSON.stringify(response.output, null, 2))
+    }
 
     if (debug) {
       console.log('Received response from OpenAI Responses API:', {
@@ -228,6 +251,18 @@ async function processNonStreamingRequest(
                 : undefined,
         })),
       )
+    }
+    
+    // Check for MCP tool usage
+    const mcpTools = response.output?.filter(item => 
+      item.type && item.type.toString().includes('mcp')
+    )
+    
+    if (mcpTools && mcpTools.length > 0) {
+      console.log('🎯 MCP tools were used in this response!')
+      console.log('🔍 MCP tool usage:', mcpTools)
+    } else {
+      console.log('❌ No MCP tools were used in this response')
     }
 
     // Find assistant message in the output
@@ -366,12 +401,15 @@ async function processStreamingRequest(
       console.log('Request params:', { model, stream: true, tools: tools ? 'defined' : 'undefined' })
     }
 
+    console.log('🚀 Making streaming request to OpenAI Responses API with MCP tools...')
     const stream = await openai.responses.create({
       model,
       input: messageContent,
       ...(tools ? { tools } : {}),
       stream: true,
     })
+    
+    console.log('📥 Received streaming response from OpenAI Responses API')
 
     // Create encoder
     const encoder = new TextEncoder()
@@ -385,7 +423,28 @@ async function processStreamingRequest(
     return new ReadableStream({
       async start(controller) {
         try {
+          let mcpToolsUsed = false
           for await (const part of stream) {
+            // Check for MCP tool usage in streaming response
+            if (part.type && part.type.toString().includes('mcp')) {
+              if (!mcpToolsUsed) {
+                console.log('🎯 MCP tools detected in streaming response!')
+                mcpToolsUsed = true
+              }
+              console.log('🔍 MCP event:', part.type, part)
+              
+              // Log specific MCP events
+              if (part.type.includes('error')) {
+                console.log('❌ MCP Error detected:', part)
+              } else if (part.type.includes('done') || part.type.includes('completed')) {
+                console.log('✅ MCP Tool completed:', part)
+              } else if (part.type.includes('result')) {
+                console.log('📋 MCP Tool result:', part)
+              }
+              
+              // Skip MCP internal events - OpenAI handles these automatically
+              continue
+            }
             // Handle text output deltas
             if (part.type === 'response.output_text.delta') {
               const chatCompletionChunk = {
@@ -610,6 +669,13 @@ async function processStreamingRequest(
           controller.close()
         } catch (error) {
           console.error('OpenAI streaming error:', error)
+          if (error instanceof Error) {
+            console.error('Error details:', {
+              message: error.message,
+              stack: error.stack,
+              name: error.name
+            })
+          }
           controller.error(error)
         }
       },

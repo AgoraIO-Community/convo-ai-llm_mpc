@@ -55,10 +55,13 @@ importers:
         version: 3.3.2
       openai:
         specifier: ^4.20.0
-        version: 4.104.0
+        version: 4.104.0(ws@8.18.3)
       serverless-http:
         specifier: ^3.2.0
         version: 3.2.0
+      ws:
+        specifier: ^8.18.3
+        version: 8.18.3
       yelp-fusion:
         specifier: ^3.0.0
         version: 3.0.0
@@ -2338,6 +2341,18 @@ packages:
     resolution: {integrity: sha512-7KxauUdBmSdWnmpaGFg+ppNjKF8uNLry8LyzjauQDOVONfFLNKrKvQOxZ/VuTIcS/gge/YNahf5RIIQWTSarlg==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
 
+  ws@8.18.3:
+    resolution: {integrity: sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
     engines: {node: '>=0.4'}
@@ -4468,7 +4483,7 @@ snapshots:
     dependencies:
       mimic-fn: 2.1.0
 
-  openai@4.104.0:
+  openai@4.104.0(ws@8.18.3):
     dependencies:
       '@types/node': 18.19.119
       '@types/node-fetch': 2.6.12
@@ -4477,6 +4492,8 @@ snapshots:
       form-data-encoder: 1.7.2
       formdata-node: 4.4.1
       node-fetch: 2.7.0
+    optionalDependencies:
+      ws: 8.18.3
     transitivePeerDependencies:
       - encoding
 
@@ -4978,6 +4995,8 @@ snapshots:
     dependencies:
       imurmurhash: 0.1.4
       signal-exit: 3.0.7
+
+  ws@8.18.3: {}
 
   xtend@4.0.2: {}
 

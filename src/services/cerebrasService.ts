@@ -35,10 +35,17 @@ interface RequestContext {
 
 const debug = process.env.NODE_ENV === 'development'
 
-// Initialize Cerebras client
-const cerebras = new Cerebras({
-  apiKey: process.env.CEREBRAS_API_KEY || '',
-})
+// Initialize Cerebras client only when needed
+let cerebras: Cerebras | null = null
+
+function getCerebrasClient(): Cerebras {
+  if (!cerebras) {
+    cerebras = new Cerebras({
+      apiKey: process.env.CEREBRAS_API_KEY || '',
+    })
+  }
+  return cerebras
+}
 
 /**
  * Creates a system message with version-specific RAG data
@@ -199,8 +206,8 @@ async function processNonStreamingRequest(
   const { userId, channel, appId } = context
 
   try {
-    // Make request to Cerebras
-    const response = await cerebras.chat.completions.create({
+      // Make request to Cerebras
+  const response = await getCerebrasClient().chat.completions.create({
       ...requestOptions,
       stream: false,
     })
@@ -364,7 +371,7 @@ async function processNonStreamingRequest(
         console.log('Making final request with tool results...')
         console.log('Last 3 messages:', JSON.stringify(fullMessages.slice(-3), null, 2))
 
-        const finalResponse = await cerebras.chat.completions.create({
+        const finalResponse = await getCerebrasClient().chat.completions.create({
           model: requestOptions.model,
           messages: fullMessages,
           max_completion_tokens: requestOptions.max_completion_tokens,
@@ -403,7 +410,7 @@ async function processStreamingRequest(
  
   try {
     // Make streaming request to Cerebras
-    const stream = await cerebras.chat.completions.create({
+    const stream = await getCerebrasClient().chat.completions.create({
       ...requestOptions,
       stream: true,
     })
@@ -485,7 +492,7 @@ async function processMultiTurnToolUse(
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const response = await cerebras.chat.completions.create({
+    const response = await getCerebrasClient().chat.completions.create({
       model,
       messages: fullMessages,
       tools: tools || cerebrasTools,
