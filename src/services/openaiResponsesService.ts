@@ -29,6 +29,7 @@ interface RequestContext {
 // Initialize OpenAI client using generic LLM configuration
 const openai = new OpenAI({
   apiKey: config.llm.openaiApiKey, // This now uses LLM_API_KEY
+  baseURL: config.llm.specializedAgentUrl || 'https://api.openai.com/v1', // Use LLM_URL if provided
 })
 
 const debug = process.env.DEBUG === 'true'
