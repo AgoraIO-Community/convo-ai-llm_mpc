@@ -1,0 +1,68 @@
+services:
+  - type: web
+    name: agora-convo-ai-mcp-server
+    env: node
+    repo: https://github.com/AgoraIO-Community/convo-ai-llm_mpc.git
+    plan: free
+    buildCommand: npm install -g pnpm@10.5.2 && pnpm install && pnpm run build
+    startCommand: pnpm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Agora Configuration
+      - key: AGORA_APP_ID
+        sync: false
+      - key: AGORA_APP_CERTIFICATE
+        sync: false
+      - key: AGORA_CUSTOMER_ID
+        sync: false
+      - key: AGORA_CUSTOMER_SECRET
+        sync: false
+      - key: AGORA_PSTN_AUTH_HEADER
+        sync: false
+      - key: AGORA_PSTN_FROM_NUMBER
+        sync: false
+      - key: AGORA_PSTN_REGION
+        sync: false
+      - key: AGORA_PSTN_API_URL
+        sync: false
+      # MCP Configuration
+      - key: LLM
+        value: MCP
+      - key: MCP_SERVER_URL
+        sync: false
+      - key: MCP_API_KEY
+        sync: false
+      - key: MCP_MODEL
+        sync: false
+      # Agent Configuration
+      - key: AGENT_ID
+        sync: false
+      - key: PSTN_UID
+        sync: false
+      # Streaming Configuration
+      - key: USE_STREAMING
+        sync: false
+      # External Service APIs
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+      - key: CUSTOM_SIP_GATEWAY
+        sync: false
+      - key: YELP_API_KEY
+        sync: false
+      # RAG Configuration
+      - key: PINECONE_API_KEY
+        sync: false
+      - key: PINECONE_INDEX_NAME
+        sync: false
+      - key: EMBEDDING_PROVIDER
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      # Phone Numbers
+      - key: HERMES_PHONE_NUMBER
+        sync: false
+      - key: SID_PHONE_NUMBER
+        sync: false
+      - key: PORT
+        sync: false

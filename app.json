@@ -1,0 +1,54 @@
+{
+  "name": "Agora Convo AI Cerebras LLM Express",
+  "description": "A node-based service layer that accepts incoming requests from the Agora Convo AI service and passes it to Cerebras AI model, allowing for RAG and tools",
+  "repository": "https://github.com/AgoraIO-Community/agora-convo-ai-cerebras-llm",
+  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "keywords": ["node", "express", "cerebras", "agora", "convo-ai", "llm"],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "AGORA_APP_ID": {
+      "description": "Your Agora App ID",
+      "required": true
+    },
+    "AGORA_APP_CERTIFICATE": {
+      "description": "Your Agora App Certificate",
+      "required": true
+    },
+    "AGORA_CUSTOMER_ID": {
+      "description": "Your Agora Customer ID",
+      "required": true
+    },
+    "AGORA_CUSTOMER_SECRET": {
+      "description": "Your Agora Customer Secret",
+      "required": true
+    },
+    "LLM": {
+      "description": "LLM Provider (CEREBRAS)",
+      "value": "CEREBRAS"
+    },
+    "CEREBRAS_API_KEY": {
+      "description": "Your Cerebras API Key",
+      "required": true
+    },
+    "CEREBRAS_MODEL": {
+      "description": "The Cerebras model to use (e.g., llama-4-scout-17b-16e-instruct)",
+      "required": true
+    },
+    "USE_STREAMING": {
+      "description": "Enable streaming responses",
+      "value": "false"
+    },
+    "AGENT_ID": {
+      "description": "Your Agent ID",
+      "required": true
+    },
+    "NODE_ENV": {
+      "description": "Environment (production, development, etc.)",
+      "value": "production"
+    }
+  }
+}
